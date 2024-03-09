@@ -1,0 +1,211 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% include 'include/head.html' %}
+</head>
+<style>
+  .navbar-brand span {
+    color: #01d28e;
+  }
+</style>
+
+<body {% block background %}{% endblock %}>
+  {% if messages %}
+  <div class="alert alert-danger" style="font-size: 12px; padding: 2px 5px; margin-left: 5px;">{{ messages }}</div>
+  {% endif %}
+  <!-- partial:partials/_navbar.html -->
+  <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+    <div class="navbar-brand-wrapper d-flex justify-content-center">
+      <div class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">
+        <a class="navbar-brand" href="#">MARIAN <span>CAFE</span></a>
+        <a class="navbar-brand brand-logo-mini" href="#"><img src="{% static 'dashboard/images/logo-mini.svg' %}"
+            alt="logo" /></a>
+        <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+          <span class="mdi mdi-sort-variant"></span>
+        </button>
+      </div>
+    </div>
+    <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
+      <ul class="navbar-nav mr-lg-4 w-100">
+        <li class="nav-item nav-search d-none d-lg-block w-100">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="search">
+                <i class="mdi mdi-magnify"></i>
+              </span>
+            </div>
+            <form method="get" action="{% url 'search_food' %}">
+              <input type="text" class="form-control" placeholder="Search now" aria-label="search"
+                aria-describedby="search" name="name">
+            </form>
+
+          </div>
+        </li>
+      </ul>
+      <ul class="navbar-nav navbar-nav-right">
+        <li class="nav-item dropdown me-1">
+          <a class="nav-link count-indicator dropdown-toggle d-flex justify-content-center align-items-center"
+            id="messageDropdown" href="#" data-bs-toggle="dropdown">
+            <i class="mdi mdi-filter-outline"></i>
+            <span class="count"></span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="messageDropdown">
+            <h6 class="p-3 mb-0">Filter options</h6>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item preview-item" href="/filter/1/">Chips</a>
+            <a class="dropdown-item preview-item" href="/filter/2/">Soft Drink</a>
+            <a class="dropdown-item preview-item" href="/filter/3/">Meal</a>
+            <a class="dropdown-item preview-item" href="/filter/4/">Cake</a>
+            <a class="dropdown-item preview-item" href="/filter/5/">Snack</a>
+          </div>
+
+        <li class="nav-item dropdown me-4">
+          <a class="nav-link count-indicator dropdown-toggle d-flex align-items-center justify-content-center notification-dropdown"
+            id="notificationDropdown" href="#" data-bs-toggle="dropdown">
+            <i class="mdi mdi-cart mx-0"></i>
+            <span><b>{{ noofitems }}</b></span>
+          </a>
+
+          <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="notificationDropdown"
+            style="width: 350px; padding: 15px; overflow: auto; max-height: 500px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <p class="mb-0 dropdown-header"
+              style="font-size: 16px; color: #333; margin-bottom: 15px; font-weight: bold;">Your Cart</p>
+            {% for item in cart %}
+            <a class="dropdown-item"
+              style="padding: 8px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <div style="display: flex; align-items: center;">
+                <img src="{{ item.items.image.url }}" alt="Food Image"
+                  style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">
+                <div>
+                  <h6 style="font-size: 14px; margin-bottom: 2px;">{{ item.items.name }}</h6>
+                  <p style="font-size: 12px; margin-bottom: 0; color: #666;">Price: {{ item.items.rate }}</p>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center;">
+                <a href="/decrease_quantity/{{ item.items.id }}/" class="btn btn-sm"
+                  style="padding: 0 5px; margin-right: 5px; background-color: #eee;">-</a>
+                <span style="font-size: 14px;">{{ item.quantity }}</span>
+                <a href="/increase_quantity/{{ item.items.id }}/" class="btn btn-sm"
+                  style="padding: 0 5px; margin-left: 5px; background-color: #eee;">+</a>
+              </div>
+              <a href="/removeFromCart/{{ item.items.id }}/" style="margin-left: 10px;">
+                <span class="badge badge-danger"
+                  style="background-color: #dc3545; cursor: pointer; font-size: 12px;">Remove</span>
+              </a>
+            </a>
+            {% empty %}
+            <p style="font-size: 14px; color: #666; text-align: center;">Your cart is empty</p>
+            {% endfor %}
+            <a href="/checkout/" class="dropdown-item"
+              style="font-size: 14px; text-align: center; padding: 8px; border-radius: 4px; margin-top: 15px; background-color: #0000ff7a; color: white;"
+              onclick="checkTotalAmount(event)">
+              <center> Checkout {% if total_amount %} - Total Amount: {{ total_amount }} Rs {% endif %}</center>
+            </a>
+
+            <script>
+              function checkTotalAmount(event) {
+                // Prevent the default action of the anchor tag (i.e., redirecting to the checkout page)
+                event.preventDefault();
+
+                // Get the total_amount from the server-side variable
+                var totalAmount = "{{ total_amount }}";
+
+                // Convert total_amount to a number
+                totalAmount = parseFloat(totalAmount);
+
+                // Check if total_amount is zero
+                if (totalAmount === 0) {
+                  // Display an alert
+                  alert("Please order something before proceeding to checkout.");
+                } else {
+                  // If total_amount is not zero, proceed to checkout
+                  window.location.href = event.target.href;
+                }
+              }
+            </script>
+
+
+
+          </div>
+
+
+        </li>
+
+        {% for i in user %}
+        <li class="nav-item nav-profile dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="profileDropdown">
+            <img src="{{i.image.url}}" alt="profile" />
+            <span class="nav-profile-name">{{i.name}}</span>
+          </a>{% endfor %}
+          <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
+            <a class="dropdown-item" href="/changep-user">
+              <i class="mdi mdi-settings text-primary"></i>
+              Change Password
+            </a>
+            <a class="dropdown-item" href="/logout">
+              <i class="mdi mdi-logout text-primary"></i>
+              Logout
+            </a>
+          </div>
+        </li>
+      </ul>
+      <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button"
+        data-toggle="offcanvas">
+        <span class="mdi mdi-menu"></span>
+      </button>
+    </div>
+  </nav>
+  <!-- partial -->
+  <div class="container-fluid page-body-wrapper">
+    <!-- partial:partials/_sidebar.html -->
+    <nav class="sidebar sidebar-offcanvas" id="sidebar">
+      <ul class="nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/user_home">
+            <i class="mdi mdi-home menu-icon"></i>
+            <span class="menu-title">User Dashboard</span>
+          </a>
+        </li>
+
+        <!-- <li class="nav-item">
+            <a class="nav-link" href="/drivers">
+              <i class="mdi mdi-view-headline menu-icon"></i>
+              <span class="menu-title">Drivers</span>
+            </a>
+          </li> -->
+        <li class="nav-item">
+          <a class="nav-link" href="/edit-user">
+            <i class="mdi mdi-chart-pie menu-icon"></i>
+            <span class="menu-title">Edit Profile</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/mybookings">
+            <i class="mdi mdi-grid-large menu-icon"></i>
+            <span class="menu-title">My Bookings</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">
+            <i class="mdi mdi-emoticon menu-icon"></i>
+            <span class="menu-title">Logout</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <!-- partial -->
+    <div class="main-panel">
+      <div class="content-wrapper">
+
+
+
+
+
+
+
+</body>
+
+</html>
+{% block body %}{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'userbase.html' %}
+{% load static %}
+{% block title %}
+    My Bookings
+{% endblock %}
+{% block background %} {% endblock %}
+{% block body %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Bookings</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .card {
+            margin-bottom: 20px;
+            text-align: center; /* Center align the content inside the card */
+        }
+        .logo {
+            width: 100px; /* Adjust the width of the logo as needed */
+            height: 100px; /* Adjust the height of the logo as needed */
+            border-radius: 50%; /* Make the logo circular */
+            margin: 0 auto 15px auto; /* Center the logo vertically and horizontally */
+        }
+        .booking-info {
+            flex-grow: 1;
+            text-align: left; /* Align the booking information text to the left */
+        }
+        .list-group-item {
+            display: flex;
+            align-items: center;
+        }
+        .list-group-item img {
+            margin-right: 10px;
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .card {
+            height: 100%;
+        }
+        .pagination {
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Bookings</h1>
+    <div class="container">
+        <div class="row">
+            {% for booking in bookings %}
+            <div class="col-md-3 d-flex align-items-stretch">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <img src="{{booking.user.image.url}}" alt="Logo" class="logo"> <!-- Display the user image as a logo -->
+                        <h5 class="card-title">Order ID: CAFEMCKA100{{ booking.id }}
+                        <span class="badge {% if booking.isDelivered == 'Delivered' %}badge-success{% else %}badge-danger{% endif %}">
+                            {{ booking.isDelivered }}{% if booking.isDelivered == 'Delivered' %} at {{ booking.delivery_date|date:"D, d M Y H:i" }}{% endif %}
+                        </span>               </h5>         
+                        <h5 class="card-title">Order Items</h5>
+                        <div class="list-group">
+                            {% for food_item in booking.items.all %}
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <img src="{{ food_item.image.url }}" alt="{{ food_item.name }}">
+                                <div class="booking-info">
+                                    <h6 class="mb-1">{{ food_item.name }} - ${{ food_item.rate }}</h6>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        <p class="card-text mt-3">Checkout Date: {{ booking.checkout_date }}</p>
+                        <p class="card-text">Total Amount: ${{ booking.total_amount }}</p>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <!-- Pagination Controls -->
+        <div class="mt-4">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    {% if bookings.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ bookings.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in bookings.paginator.page_range %}
+                        {% if bookings.number == num %}
+                            <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% elif num > bookings.number|add:'-3' and num < bookings.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if bookings.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ bookings.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ bookings.paginator.num_pages }}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</body>
+</html>
+
+{% endblock %}

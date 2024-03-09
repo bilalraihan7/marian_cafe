@@ -1,0 +1,72 @@
+{% extends 'staff_base.html' %}
+{% load static %}
+
+{% block title %}
+Bookings
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h2>Bookings</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User Name</th>
+                <th>User Photo</th>
+                <th>Booked Items</th>
+                <th>Item Photos</th>
+                <th>Checkout Time</th>
+                <th>Delivery Status</th>
+                <th>Total Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>CAFEMCKA100{{ booking.id }}</td>
+                <td>&nbsp;{{ booking.user.name }}</td>
+                <td><img src="{{ booking.user.image.url }}" alt="User Photo" style="width: 50px; height: 50px; border-radius: 50%;"></td>
+                <td>
+                    {% for item in booking.items.all %}
+                        {{ item.name }}<br><br>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for item in booking.items.all %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 5px;">
+                    {% endfor %}
+                </td>
+                <td>{{ booking.checkout_date|date:"D, d M Y H:i" }}</td>
+                <td>
+                    {% if booking.isDelivered == 'Delivered' %}
+                        <center><span class="badge badge-success">{{ booking.isDelivered }} at<br> {{ booking.delivery_date|date:"D, d M Y H:i" }}</span></center>
+                    {% else %}
+                        <a href="/deliver/{{booking.id}}/"><button class="btn btn-primary">Mark as Delivered</button></a>
+                    {% endif %}
+                </td>
+                
+                
+                <td>{{ booking.total_amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="pagination">
+        <span class="step-links">
+            {% if bookings.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ bookings.previous_page_number }}">previous</a>
+            {% endif %}
+            
+            <span class="current">
+                Page {{ bookings.number }} of {{ bookings.paginator.num_pages }}.
+            </span>
+            {% if bookings.has_next %}
+            <a href="?page={{ bookings.next_page_number }}" class="btn btn-primary mr-2">Next</a>
+            <a href="?page={{ bookings.paginator.num_pages }}" class="btn btn-secondary">Last &raquo;</a>
+        {% endif %}
+        </span>
+    </div>
+</div>
+{% endblock %}
