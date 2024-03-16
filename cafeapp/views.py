@@ -83,7 +83,7 @@ def login(request):
                 request.session['name']=name
             # context ={'a': obj }
             if status == 'Verified':
-                return redirect('http://127.0.0.1:8000/staff_home')
+                return redirect('/staff_home')
             else:
                 msg='Your Account Verification Is Under Processing'
                 return render(request, 'cafeapp/login.html',{'msg2':msg})
@@ -98,7 +98,7 @@ def login(request):
                 request.session['id'] = id
                 request.session['is_verified'] =is_verified
                 if is_verified==True:
-                    return redirect('http://127.0.0.1:8000/user_home')
+                    return redirect('/user_home')
                 else:
                     context = {'msg': 'Your Account Verification Is Under Processing'}
                     return render(request,'cafeapp/login.html',context)
